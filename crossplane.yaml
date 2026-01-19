@@ -1,0 +1,20 @@
+apiVersion: meta.pkg.crossplane.io/v1
+kind: Configuration
+metadata:
+  name: configuration-eos
+  annotations:
+    meta.crossplane.io/source: https://github.com/mbakalarski/configuration-eos
+    meta.crossplane.io/license: Apache-2.0
+    meta.crossplane.io/description: EOS router configurations.
+    meta.crossplane.io/readme: |
+      GitOps-driven lifecycle management for EOS routers.
+      Based on the netclab-xp project, this package abstracts device-specific complexity,
+      enabling consistent and reproducible network configuration.
+spec:
+  crossplane:
+    version: ">=v2.1.1"
+  dependsOn:
+  - apiVersion: pkg.crossplane.io/v1
+    kind: Configuration
+    package: xpkg.upbound.io/netclab/netclab-xp
+    version: ">=v0.2.7"

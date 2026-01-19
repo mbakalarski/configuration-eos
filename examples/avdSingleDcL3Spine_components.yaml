@@ -1,0 +1,96 @@
+apiVersion: eos.netclab.dev/v1alpha1
+kind: VlanInternalAllocation
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  order: ascending
+  range:
+    start: 1006
+    end: 1199
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: StpMode
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  stpMode: none
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: IpRouting
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    ip prefix-list PL-LOOPBACKS-EVPN-OVERLAY:
+      seq 10 permit 10.255.0.0/27 eq 32: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    route-map RM-CONN-2-BGP permit 10:
+      match ip address prefix-list PL-LOOPBACKS-EVPN-OVERLAY: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    router bfd:
+      multihop interval 300 min-rx 300 multiplier 3: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    router bgp 65100:
+      router-id 10.255.0.1: {}
+      no bgp default ipv4-unicast: {}
+      maximum-paths 4 ecmp 4: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpPeerGroup
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  peerGroupName: EVPN-OVERLAY-PEERS
+  nextHopUnchanged: true
+  updateSource: Loopback0
+  bfd: true
+  ebgpMultihop: 3
+  sendCommunityTypes:
+  - EXTENDED
+  - STANDARD
+  maximumRoutes: 0
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpPeerGroup
+metadata:
+  generateName: dc1-spine1-
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  peerGroupName: IPv4-UNDERLAY-PEERS
+  sendCommunityTypes:
+  - EXTENDED
+  - STANDARD
+  maximumRoutes: 12000
+---
