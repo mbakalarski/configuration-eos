@@ -1,0 +1,49 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: bfdmultihopglobals.eos.netclab.dev
+spec:
+  defaultCompositionRef:
+    name: bfdmultihopglobals.eapi.eos.netclab.dev
+  scope: Cluster
+  group: eos.netclab.dev
+  names:
+    kind: BfdMultihopGlobal
+    plural: bfdmultihopglobals
+    categories:
+    - crossplane
+    - netclab
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    additionalPrinterColumns:
+    - name: ENDPOINT
+      type: string
+      jsonPath: .spec.endpoint
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              endpoint:
+                type: string
+              interval:
+                type: integer
+                minimum: 50
+                maximum: 60000
+              minRx:
+                type: integer
+                minimum: 50
+                maximum: 60000
+              multiplier:
+                type: integer
+                minimum: 3
+                maximum: 50
+            required:
+            - endpoint
+            - interval
+            - minRx
+            - multiplier
