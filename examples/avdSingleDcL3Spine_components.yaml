@@ -1,7 +1,7 @@
 apiVersion: eos.netclab.dev/v1alpha1
 kind: VlanInternalAllocation
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-1
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
   order: ascending
@@ -12,7 +12,7 @@ spec:
 apiVersion: eos.netclab.dev/v1alpha1
 kind: StpMode
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-2
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
   stpMode: none
@@ -20,14 +20,23 @@ spec:
 apiVersion: eos.netclab.dev/v1alpha1
 kind: IpRouting
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-3
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-4-0
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    ip prefix-list PL-LOOPBACKS-EVPN-OVERLAY: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-spine1-4
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
   cmds:
@@ -37,7 +46,16 @@ spec:
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-5-0
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    route-map RM-CONN-2-BGP permit 10: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-spine1-5
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
   cmds:
@@ -47,7 +65,7 @@ spec:
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-6
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
   cmds:
@@ -57,19 +75,29 @@ spec:
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-8-0
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
   cmds:
-    router bgp 65100:
-      router-id 10.255.0.1: {}
-      no bgp default ipv4-unicast: {}
-      maximum-paths 4 ecmp 4: {}
+    router bgp 65100: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpGlobal
+metadata:
+  name: dc1-spine1-8
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  asn: 65100
+  routerId: 10.255.0.1
+  disableBgpDefaultIpv4Unicast: true
+  maximumPaths:
+    number: 4
+    ecmp: 4
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: BgpPeerGroup
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-9
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
   peerGroupName: EVPN-OVERLAY-PEERS
@@ -85,7 +113,7 @@ spec:
 apiVersion: eos.netclab.dev/v1alpha1
 kind: BgpPeerGroup
 metadata:
-  generateName: dc1-spine1-
+  name: dc1-spine1-10
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
   peerGroupName: IPv4-UNDERLAY-PEERS
@@ -94,3 +122,67 @@ spec:
   - STANDARD
   maximumRoutes: 12000
 ---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpNeighbor
+metadata:
+  name: dc1-spine1-11
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  asn: 65100
+  neighborIp: 10.255.0.3
+  neighborAsn: 65101
+  peerGroup: EVPN-OVERLAY-PEERS
+  crossplane:
+    compositionRef:
+      name: bgpneighbors.eapi.eos.netclab.dev
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-spine1-12
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    router bgp 65100:
+      redistribute connected route-map RM-CONN-2-BGP: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-spine1-13
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    router bgp 65100:
+      address-family evpn:
+        neighbor EVPN-OVERLAY-PEERS activate: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-spine1-14
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  cmds:
+    router bgp 65100:
+      address-family ipv4:
+        no neighbor EVPN-OVERLAY-PEERS activate: {}
+        neighbor IPv4-UNDERLAY-PEERS activate: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: LoopbackInterface
+metadata:
+  name: dc1-spine1-15
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  ifName: Loopback0
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: RoutedInterface
+metadata:
+  name: dc1-spine1-16
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  ifName: Loopback0
+  ipv4Address: 10.255.0.1
+  ipv4PrefixLength: 32

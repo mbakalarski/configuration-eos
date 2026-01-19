@@ -1,0 +1,41 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: bgpneighbors.eapi.eos.netclab.dev
+spec:
+  compositeTypeRef:
+    apiVersion: eos.netclab.dev/v1alpha1
+    kind: BgpNeighbor
+  mode: Pipeline
+  pipeline:
+  - step: eoscommands
+    functionRef:
+      name: crossplane-contrib-function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $spec := .observed.composite.resource.spec }}
+          {{- $endpoint := $spec.endpoint }}
+          {{- $asn := $spec.asn }}
+          {{- $neighborIp := $spec.neighborIp }}
+          {{- $neighborAsn := $spec.neighborAsn }}
+          {{- $peerGroup := $spec.peerGroup }}
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: EosCommand
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ .observed.composite.resource.metadata.name }}-bgpneighbor
+          spec:
+            endpoint: {{ $endpoint }}
+            cmds:
+              router bgp {{ $asn }}:
+                neighbor {{ $neighborIp }} peer group {{ $peerGroup }}: {}
+                neighbor {{ $neighborIp }} remote-as {{ $neighborAsn }}: {}
+
+  - step: auto-ready
+    functionRef:
+      name: crossplane-contrib-function-auto-ready

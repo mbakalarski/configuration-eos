@@ -1,0 +1,13 @@
+topology:
+  name: single-dc-l3ls
+  networks:
+  - name: b1
+    type: bridge
+  nodes:
+  - name: dc1-spine1
+    type: ceos
+    memory: 2Gi
+    cpu: 1000m
+    interfaces:
+    - name: eth1
+      network: b1
