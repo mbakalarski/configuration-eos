@@ -1,0 +1,47 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: bgpaddressfamilys.eapi.eos.netclab.dev
+spec:
+  compositeTypeRef:
+    apiVersion: eos.netclab.dev/v1alpha1
+    kind: BgpAddressFamily
+  mode: Pipeline
+  pipeline:
+  - step: eoscommands
+    functionRef:
+      name: crossplane-contrib-function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $spec := .observed.composite.resource.spec }}
+          {{- $endpoint := $spec.endpoint }}
+          {{- $asn := $spec.asn }}
+          {{- $addressFamily := $spec.addressFamily }}
+          {{- $afName := $addressFamily.afName }}
+          {{- $neighbors := $addressFamily.neighbors }}
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: EosCommand
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ .observed.composite.resource.metadata.name }}-bgpaf-{{ $afName }}
+          spec:
+            endpoint: {{ $endpoint }}
+            cmds:
+              router bgp {{ $asn }}:
+                address-family {{ $afName }}:
+                {{- range $neighbors }}
+                  {{- if .active }}
+                  neighbor {{ .pgNameOrAddress }} activate: {}
+                  {{- else }}
+                  no neighbor {{ .pgNameOrAddress }} activate: {}
+                  {{- end }}
+                {{- end }}
+
+  - step: auto-ready
+    functionRef:
+      name: crossplane-contrib-function-auto-ready

@@ -1,0 +1,72 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: bgpaddressfamilys.eos.netclab.dev
+spec:
+  defaultCompositionRef:
+    name: bgpaddressfamilys.eapi.eos.netclab.dev
+  scope: Cluster
+  group: eos.netclab.dev
+  names:
+    kind: BgpAddressFamily
+    plural: bgpaddressfamilys
+    categories:
+    - crossplane
+    - netclab
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    additionalPrinterColumns:
+    - name: ENDPOINT
+      type: string
+      jsonPath: .spec.endpoint
+    - name: VRF
+      type: string
+      jsonPath: .spec.networkInstance
+    - name: AFI
+      type: string
+      jsonPath: .spec.addressFamily.afName
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              endpoint:
+                type: string
+              networkInstance:
+                type: string
+                default: default
+              asn:
+                type: integer
+              addressFamily:
+                type: object
+                properties:
+                  afName:
+                    type: string
+                    enum:
+                    - evpn
+                    - ipv4
+                    - ipv6
+                    - vpn-ipv4
+                    - vpn-ipv6
+                  neighbors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        pgNameOrAddress:
+                          type: string
+                        active:
+                          type: boolean
+                      required:
+                      - pgNameOrAddress
+                      - active
+                required:
+                - afName
+            required:
+            - endpoint
+            - asn
+            - addressFamily

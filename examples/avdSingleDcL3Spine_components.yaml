@@ -25,42 +25,15 @@ spec:
   endpoint: dc1-spine1.default.svc.cluster.local
 ---
 apiVersion: eos.netclab.dev/v1alpha1
-kind: EosCommand
-metadata:
-  name: dc1-spine1-4-0
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  cmds:
-    ip prefix-list PL-LOOPBACKS-EVPN-OVERLAY: {}
----
-apiVersion: eos.netclab.dev/v1alpha1
-kind: EosCommand
+kind: BgpInterfaceExport
 metadata:
   name: dc1-spine1-4
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
-  cmds:
-    ip prefix-list PL-LOOPBACKS-EVPN-OVERLAY:
-      seq 10 permit 10.255.0.0/27 eq 32: {}
----
-apiVersion: eos.netclab.dev/v1alpha1
-kind: EosCommand
-metadata:
-  name: dc1-spine1-5-0
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  cmds:
-    route-map RM-CONN-2-BGP permit 10: {}
----
-apiVersion: eos.netclab.dev/v1alpha1
-kind: EosCommand
-metadata:
-  name: dc1-spine1-5
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  cmds:
-    route-map RM-CONN-2-BGP permit 10:
-      match ip address prefix-list PL-LOOPBACKS-EVPN-OVERLAY: {}
+  asn: 65100
+  ifName: Loopback0
+  ipv4Address: 10.255.0.1
+  ipv4PrefixLength: 32
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -137,37 +110,38 @@ spec:
       name: bgpneighbors.eapi.eos.netclab.dev
 ---
 apiVersion: eos.netclab.dev/v1alpha1
-kind: EosCommand
-metadata:
-  name: dc1-spine1-12
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  cmds:
-    router bgp 65100:
-      redistribute connected route-map RM-CONN-2-BGP: {}
----
-apiVersion: eos.netclab.dev/v1alpha1
-kind: EosCommand
+kind: BgpAddressFamily
 metadata:
   name: dc1-spine1-13
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
-  cmds:
-    router bgp 65100:
-      address-family evpn:
-        neighbor EVPN-OVERLAY-PEERS activate: {}
+  asn: 65100
+  addressFamily:
+    afName: evpn
+    neighbors:
+    - pgNameOrAddress: EVPN-OVERLAY-PEERS
+      active: true
+  crossplane:
+    compositionRef:
+      name: bgpaddressfamilys.eapi.eos.netclab.dev
 ---
 apiVersion: eos.netclab.dev/v1alpha1
-kind: EosCommand
+kind: BgpAddressFamily
 metadata:
   name: dc1-spine1-14
 spec:
   endpoint: dc1-spine1.default.svc.cluster.local
-  cmds:
-    router bgp 65100:
-      address-family ipv4:
-        no neighbor EVPN-OVERLAY-PEERS activate: {}
-        neighbor IPv4-UNDERLAY-PEERS activate: {}
+  asn: 65100
+  addressFamily:
+    afName: ipv4
+    neighbors:
+    - pgNameOrAddress: EVPN-OVERLAY-PEERS
+      active: false
+    - pgNameOrAddress: IPv4-UNDERLAY-PEERS
+      active: true
+  crossplane:
+    compositionRef:
+      name: bgpaddressfamilys.eapi.eos.netclab.dev
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: LoopbackInterface
@@ -186,3 +160,13 @@ spec:
   ifName: Loopback0
   ipv4Address: 10.255.0.1
   ipv4PrefixLength: 32
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: RoutedInterface
+metadata:
+  name: dc1-spine1-17
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  ifName: Ethernet1
+  ipv4Address: 10.255.255.0
+  ipv4PrefixLength: 31
