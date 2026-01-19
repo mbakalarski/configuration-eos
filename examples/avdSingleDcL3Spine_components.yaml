@@ -46,15 +46,6 @@ spec:
       multihop interval 300 min-rx 300 multiplier 3: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
-kind: EosCommand
-metadata:
-  name: dc1-spine1-8-0
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  cmds:
-    router bgp 65100: {}
----
-apiVersion: eos.netclab.dev/v1alpha1
 kind: BgpGlobal
 metadata:
   name: dc1-spine1-8
