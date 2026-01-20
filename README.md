@@ -7,7 +7,7 @@ up login
 ```
 
 ```
-export VERSION=v0.0.3
+export VERSION=v0.0.4
 crossplane xpkg build --package-root=./ --package-file=./configuration-eos-${VERSION}.xpkg --examples-root=./examples --ignore=doc/*
 up xpkg push -f configuration-eos-${VERSION}.xpkg xpkg.upbound.io/netclab/configuration-eos:${VERSION}
 rm configuration-eos-${VERSION}.xpkg

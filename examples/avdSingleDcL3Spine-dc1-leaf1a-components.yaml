@@ -17,7 +17,8 @@ spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
     spanning-tree mode mstp: {}
-    no spanning-tree vlan-id 4093-4094: {}    # TODO: function-eapi: leaf cmd startswith "no "
+    # TODO: function-eapi: leaf cmd startswith "no "
+    # no spanning-tree vlan-id 4093-4094: {}
     spanning-tree mst 0 priority 4096: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
@@ -27,7 +28,8 @@ metadata:
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
-    vlan 11: {}
+    vlan 11:
+      name VRF10_VLAN11: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -36,7 +38,8 @@ metadata:
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
-    vlan 12: {}
+    vlan 12:
+      name VRF10_VLAN12: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -45,7 +48,8 @@ metadata:
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
-    vlan 21: {}
+    vlan 21:
+      name VRF11_VLAN21: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -54,7 +58,8 @@ metadata:
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
-    vlan 22: {}
+    vlan 22:
+      name VRF11_VLAN22: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -64,6 +69,7 @@ spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
     vlan 3009:
+      name MLAG_L3_VRF_VRF10: {}
       trunk group MLAG: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
@@ -74,6 +80,7 @@ spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
     vlan 3010:
+      name MLAG_L3_VRF_VRF11: {}
       trunk group MLAG: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
@@ -83,7 +90,8 @@ metadata:
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
-    vlan 3401: {}
+    vlan 3401:
+      name L2_VLAN3401: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -92,7 +100,8 @@ metadata:
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
-    vlan 3402: {}
+    vlan 3402:
+      name L2_VLAN3402: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -102,6 +111,7 @@ spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
     vlan 4093:
+      name MLAG_L3: {}
       trunk group MLAG: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
@@ -112,6 +122,7 @@ spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
     vlan 4094:
+      name MLAG: {}
       trunk group MLAG: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
@@ -600,7 +611,6 @@ spec:
   - EXTENDED
   - STANDARD
   maximumRoutes: 12000
-
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -618,13 +628,11 @@ spec:
       neighbor MLAG-IPv4-UNDERLAY-PEER password 7 4b21pAdCvWeAqpcKDFMdWw==: {}
       neighbor MLAG-IPv4-UNDERLAY-PEER send-community: {}
       neighbor MLAG-IPv4-UNDERLAY-PEER maximum-routes 12000: {}
-
-
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: BgpNeighbor
 metadata:
-  name: dc1-leaf1a-11
+  name: dc1-leaf1a-29-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   asn: 65101
@@ -636,12 +644,175 @@ spec:
       name: bgpneighbors.eapi.eos.netclab.dev
 ---
 apiVersion: eos.netclab.dev/v1alpha1
-kind: BgpAddressFamily
+kind: BgpNeighbor
 metadata:
-  name: dc1-leaf1a-13
+  name: dc1-leaf1a-29-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
-  asn: 65100
+  asn: 65101
+  neighborIp: 10.255.0.2
+  neighborAsn: 65100
+  peerGroup: EVPN-OVERLAY-PEERS
+  crossplane:
+    compositionRef:
+      name: bgpneighbors.eapi.eos.netclab.dev
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpNeighbor
+metadata:
+  name: dc1-leaf1a-30-1
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  asn: 65101
+  neighborIp: 10.255.255.0
+  neighborAsn: 65100
+  peerGroup: IPv4-UNDERLAY-PEERS
+  crossplane:
+    compositionRef:
+      name: bgpneighbors.eapi.eos.netclab.dev
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpNeighbor
+metadata:
+  name: dc1-leaf1a-30-2
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  asn: 65101
+  neighborIp: 10.255.255.2
+  neighborAsn: 65100
+  peerGroup: IPv4-UNDERLAY-PEERS
+  crossplane:
+    compositionRef:
+      name: bgpneighbors.eapi.eos.netclab.dev
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpNeighbor
+metadata:
+  name: dc1-leaf1a-31
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  asn: 65101
+  neighborIp: 10.255.1.97
+  peerGroup: MLAG-IPv4-UNDERLAY-PEER
+  crossplane:
+    compositionRef:
+      name: bgpneighbors.eapi.eos.netclab.dev
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-32
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    router bgp 65101:
+      redistribute connected route-map RM-CONN-2-BGP: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-33-1
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    router bgp 65101:
+      vlan 11:
+        rd 10.255.0.3:10011: {}
+        route-target both 10011:10011: {}
+        redistribute learned: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-33-2
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    router bgp 65101:
+      vlan 12:
+        rd 10.255.0.3:10012: {}
+        route-target both 10012:10012: {}
+        redistribute learned: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-33-3
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    router bgp 65101:
+      vlan 21:
+        rd 10.255.0.3:10021: {}
+        route-target both 10021:10021: {}
+        redistribute learned: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-33-4
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    router bgp 65101:
+      vlan 22:
+        rd 10.255.0.3:10022: {}
+        route-target both 10022:10022: {}
+        redistribute learned: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-33-5
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    router bgp 65101:
+      vlan 3401:
+        rd 10.255.0.3:13401: {}
+        route-target both 13401:13401: {}
+        redistribute learned: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-33-6
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    router bgp 65101:
+      vlan 3402:
+        rd 10.255.0.3:13402: {}
+        route-target both 13402:13402: {}
+        redistribute learned: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpAddressFamily
+metadata:
+  name: dc1-leaf1a-34-1
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  asn: 65101
+  addressFamily:
+    afName: ipv4
+    neighbors:
+    - pgNameOrAddress: EVPN-OVERLAY-PEERS
+      active: false
+    - pgNameOrAddress: IPv4-UNDERLAY-PEERS
+      active: true
+    - pgNameOrAddress: MLAG-IPv4-UNDERLAY-PEER
+      active: true
+  crossplane:
+    compositionRef:
+      name: bgpaddressfamilys.eapi.eos.netclab.dev
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpAddressFamily
+metadata:
+  name: dc1-leaf1a-34-2
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  asn: 65101
   addressFamily:
     afName: evpn
     neighbors:
@@ -652,19 +823,35 @@ spec:
       name: bgpaddressfamilys.eapi.eos.netclab.dev
 ---
 apiVersion: eos.netclab.dev/v1alpha1
-kind: BgpAddressFamily
+kind: EosCommand
 metadata:
-  name: dc1-leaf1a-14
+  name: dc1-leaf1a-35-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
-  asn: 65100
-  addressFamily:
-    afName: ipv4
-    neighbors:
-    - pgNameOrAddress: EVPN-OVERLAY-PEERS
-      active: false
-    - pgNameOrAddress: IPv4-UNDERLAY-PEERS
-      active: true
-  crossplane:
-    compositionRef:
-      name: bgpaddressfamilys.eapi.eos.netclab.dev
+  cmds:
+    router bgp 65101:
+      vrf VRF10:
+        rd 10.255.0.3:10: {}
+        route-target import evpn 10:10: {}
+        route-target export evpn 10:10: {}
+        router-id 10.255.0.3: {}
+        neighbor 10.255.1.97 peer group MLAG-IPv4-UNDERLAY-PEER: {}
+        neighbor 10.255.1.97 description dc1-leaf1b_Vlan3009: {}
+        redistribute connected route-map RM-CONN-2-BGP-VRFS: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-35-2
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    router bgp 65101:
+      vrf VRF11:
+        rd 10.255.0.3:11: {}
+        route-target import evpn 11:11: {}
+        route-target export evpn 11:11: {}
+        router-id 10.255.0.3: {}
+        neighbor 10.255.1.97 peer group MLAG-IPv4-UNDERLAY-PEER: {}
+        neighbor 10.255.1.97 description dc1-leaf1b_Vlan3010: {}
+        redistribute connected route-map RM-CONN-2-BGP-VRFS: {}
