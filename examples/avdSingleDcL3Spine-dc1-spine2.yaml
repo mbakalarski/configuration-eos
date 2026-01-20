@@ -1,0 +1,39 @@
+apiVersion: eos.netclab.dev/v1alpha1
+kind: AvdSingleDcL3Spine
+metadata:
+  name: dc1-spine2
+spec:
+  endpoint: dc1-spine2.default.svc.cluster.local
+  asn: 65100
+  routerId: 10.255.0.2
+  routedInterfaces:
+  - ifName: Ethernet1
+    ipv4Address: 10.255.255.2
+    ipv4PrefixLength: 31
+  - ifName: Ethernet2
+    ipv4Address: 10.255.255.6
+    ipv4PrefixLength: 31
+  - ifName: Ethernet3
+    ipv4Address: 10.255.255.10
+    ipv4PrefixLength: 31
+  - ifName: Ethernet4
+    ipv4Address: 10.255.255.14
+    ipv4PrefixLength: 31
+  evpnOverlayPeers:
+  - neighborIp: 10.255.0.3
+    neighborAsn: 65101
+  - neighborIp: 10.255.0.4
+    neighborAsn: 65101
+  - neighborIp: 10.255.0.5
+    neighborAsn: 65102
+  - neighborIp: 10.255.0.6
+    neighborAsn: 65102
+  ipv4UnderlayPeers:
+  - neighborIp: 10.255.255.3
+    neighborAsn: 65101
+  - neighborIp: 10.255.255.7
+    neighborAsn: 65101
+  - neighborIp: 10.255.255.11
+    neighborAsn: 65102
+  - neighborIp: 10.255.255.15
+    neighborAsn: 65102

@@ -25,17 +25,6 @@ spec:
   endpoint: dc1-spine1.default.svc.cluster.local
 ---
 apiVersion: eos.netclab.dev/v1alpha1
-kind: BgpInterfaceExport
-metadata:
-  name: dc1-spine1-4
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  asn: 65100
-  ifName: Loopback0
-  ipv4Address: 10.255.0.1
-  ipv4PrefixLength: 32
----
-apiVersion: eos.netclab.dev/v1alpha1
 kind: BfdMultihopGlobal
 metadata:
   name: dc1-spine1-6
@@ -49,6 +38,34 @@ spec:
       name: bfdmultihopglobals.eapi.eos.netclab.dev
 ---
 apiVersion: eos.netclab.dev/v1alpha1
+kind: RoutedInterface
+metadata:
+  name: dc1-spine1-17
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  ifName: Ethernet1
+  ipv4Address: 10.255.255.0
+  ipv4PrefixLength: 31
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: LoopbackInterface
+metadata:
+  name: dc1-spine1-15
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  ifName: Loopback0
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: RoutedInterface
+metadata:
+  name: dc1-spine1-16
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  ifName: Loopback0
+  ipv4Address: 10.255.0.1
+  ipv4PrefixLength: 32
+---
+apiVersion: eos.netclab.dev/v1alpha1
 kind: BgpGlobal
 metadata:
   name: dc1-spine1-8
@@ -60,6 +77,17 @@ spec:
   maximumPaths:
     number: 4
     ecmp: 4
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: BgpInterfaceExport
+metadata:
+  name: dc1-spine1-4
+spec:
+  endpoint: dc1-spine1.default.svc.cluster.local
+  asn: 65100
+  ifName: Loopback0
+  ipv4Address: 10.255.0.1
+  ipv4PrefixLength: 32
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: BgpPeerGroup
@@ -136,31 +164,3 @@ spec:
   crossplane:
     compositionRef:
       name: bgpaddressfamilys.eapi.eos.netclab.dev
----
-apiVersion: eos.netclab.dev/v1alpha1
-kind: LoopbackInterface
-metadata:
-  name: dc1-spine1-15
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  ifName: Loopback0
----
-apiVersion: eos.netclab.dev/v1alpha1
-kind: RoutedInterface
-metadata:
-  name: dc1-spine1-16
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  ifName: Loopback0
-  ipv4Address: 10.255.0.1
-  ipv4PrefixLength: 32
----
-apiVersion: eos.netclab.dev/v1alpha1
-kind: RoutedInterface
-metadata:
-  name: dc1-spine1-17
-spec:
-  endpoint: dc1-spine1.default.svc.cluster.local
-  ifName: Ethernet1
-  ipv4Address: 10.255.255.0
-  ipv4PrefixLength: 31

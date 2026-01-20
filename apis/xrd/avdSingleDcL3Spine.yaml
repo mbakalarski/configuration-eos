@@ -1,0 +1,81 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: avdsingledcl3spines.eos.netclab.dev
+spec:
+  defaultCompositionRef:
+    name: avdsingledcl3spines.eos.netclab.dev
+  scope: Cluster
+  group: eos.netclab.dev
+  names:
+    kind: AvdSingleDcL3Spine
+    plural: avdsingledcl3spines
+    categories:
+    - crossplane
+    - netclab
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    additionalPrinterColumns:
+    - name: ENDPOINT
+      type: string
+      jsonPath: .spec.endpoint
+    - name: ASN
+      type: integer
+      jsonPath: .spec.asn
+    - name: ROUTER-ID
+      type: string
+      jsonPath: .spec.routerId
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              endpoint:
+                type: string
+              asn:
+                type: integer
+              routerId:
+                type: string
+              routedInterfaces:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ifName:
+                      type: string
+                    ipv4Address:
+                      type: string
+                    ipv4PrefixLength:
+                      type: integer
+                  required:
+                  - ifName
+                  - ipv4Address
+                  - ipv4PrefixLength
+              evpnOverlayPeers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    neighborIp:
+                      type: string
+                    neighborAsn:
+                      type: integer
+                  required:
+                  - neighborIp
+                  - neighborAsn
+              ipv4UnderlayPeers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    neighborIp:
+                      type: string
+                    neighborAsn:
+                      type: integer
+                  required:
+                  - neighborIp
+                  - neighborAsn

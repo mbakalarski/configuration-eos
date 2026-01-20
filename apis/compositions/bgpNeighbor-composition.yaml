@@ -21,7 +21,9 @@ spec:
           {{- $endpoint := $spec.endpoint }}
           {{- $asn := $spec.asn }}
           {{- $neighborIp := $spec.neighborIp }}
-          {{- $neighborAsn := $spec.neighborAsn }}
+          {{- if hasKey $spec "neighborAsn" }}
+            {{- $neighborAsn := $spec.neighborAsn }}
+          {{- end }}
           {{- $peerGroup := $spec.peerGroup }}
           ---
           apiVersion: eos.netclab.dev/v1alpha1
@@ -34,7 +36,9 @@ spec:
             cmds:
               router bgp {{ $asn }}:
                 neighbor {{ $neighborIp }} peer group {{ $peerGroup }}: {}
+                {{- if hasKey $spec "neighborAsn" }}
                 neighbor {{ $neighborIp }} remote-as {{ $neighborAsn }}: {}
+                {{- end }}
 
   - step: auto-ready
     functionRef:

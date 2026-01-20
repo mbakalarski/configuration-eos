@@ -1,0 +1,238 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: avdsingledcl3spines.eos.netclab.dev
+spec:
+  compositeTypeRef:
+    apiVersion: eos.netclab.dev/v1alpha1
+    kind: AvdSingleDcL3Spine
+  mode: Pipeline
+  pipeline:
+  - step: components
+    functionRef:
+      name: crossplane-contrib-function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $xrName := .observed.composite.resource.metadata.name }}
+          {{- $spec := .observed.composite.resource.spec }}
+          {{- $endpoint := $spec.endpoint }}
+          {{- $asn := $spec.asn }}
+          {{- $routerId := $spec.routerId }}
+          {{- $routedInterfaces := $spec.routedInterfaces }}
+          {{- $evpnOverlayPeers := $spec.evpnOverlayPeers }}
+          {{- $ipv4UnderlayPeers := $spec.ipv4UnderlayPeers }}
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: VlanInternalAllocation
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-VlanInternalAllocation
+          spec:
+            endpoint: {{ $endpoint }}
+            order: ascending
+            range:
+              start: 1006
+              end: 1199
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: StpMode
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-StpMode
+          spec:
+            endpoint: {{ $endpoint }}
+            stpMode: none
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: IpRouting
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-IpRouting
+          spec:
+            endpoint: {{ $endpoint }}
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BfdMultihopGlobal
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-BfdMultihopGlobal
+          spec:
+            endpoint: {{ $endpoint }}
+            interval: 300
+            minRx: 300
+            multiplier: 3
+            crossplane:
+              compositionRef:
+                name: bfdmultihopglobals.eapi.eos.netclab.dev
+    
+          {{- range $routedInterfaces }}
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: RoutedInterface
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-{{ .ifName }}
+          spec:
+            endpoint: {{ $endpoint }}
+            ifName: {{ .ifName }}
+            ipv4Address: "{{ .ipv4Address }}"
+            ipv4PrefixLength: {{ .ipv4PrefixLength }}
+          {{- end }}
+
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: LoopbackInterface
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-LoopbackInterface
+          spec:
+            endpoint: {{ $endpoint }}
+            ifName: Loopback0
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: RoutedInterface
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-LoopbackIpv4
+          spec:
+            endpoint: {{ $endpoint }}
+            ifName: Loopback0
+            ipv4Address: {{ $routerId }}
+            ipv4PrefixLength: 32
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BgpGlobal
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-BgpGlobal
+          spec:
+            endpoint: {{ $endpoint }}
+            asn: {{ $asn }}
+            routerId: {{ $routerId }}
+            disableBgpDefaultIpv4Unicast: true
+            maximumPaths:
+              number: 4
+              ecmp: 4
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BgpInterfaceExport
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-BgpInterfaceExport
+          spec:
+            endpoint: {{ $endpoint }}
+            asn: {{ $asn }}
+            ifName: Loopback0
+            ipv4Address: {{ $routerId }}
+            ipv4PrefixLength: 32
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BgpPeerGroup
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-BgpPgEvpn
+          spec:
+            endpoint: {{ $endpoint }}
+            peerGroupName: EVPN-OVERLAY-PEERS
+            nextHopUnchanged: true
+            updateSource: Loopback0
+            bfd: true
+            ebgpMultihop: 3
+            sendCommunityTypes:
+            - EXTENDED
+            - STANDARD
+            maximumRoutes: 0
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BgpPeerGroup
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-BgpPgIpv4
+          spec:
+            endpoint: {{ $endpoint }}
+            peerGroupName: IPv4-UNDERLAY-PEERS
+            sendCommunityTypes:
+            - EXTENDED
+            - STANDARD
+            maximumRoutes: 12000
+
+          {{- range $evpnOverlayPeers }}
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BgpNeighbor
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-{{ .neighborIp }}
+          spec:
+            endpoint: {{ $endpoint }}
+            asn: {{ $asn }}
+            neighborIp: {{ .neighborIp }}
+            neighborAsn: {{ .neighborAsn }}
+            peerGroup: EVPN-OVERLAY-PEERS
+            crossplane:
+              compositionRef:
+                name: bgpneighbors.eapi.eos.netclab.dev
+          {{- end }}
+
+          {{- range $ipv4UnderlayPeers }}
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BgpNeighbor
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-{{ .neighborIp }}
+          spec:
+            endpoint: {{ $endpoint }}
+            asn: {{ $asn }}
+            neighborIp: {{ .neighborIp }}
+            neighborAsn: {{ .neighborAsn }}
+            peerGroup: IPv4-UNDERLAY-PEERS
+            crossplane:
+              compositionRef:
+                name: bgpneighbors.eapi.eos.netclab.dev
+          {{- end }}
+
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BgpAddressFamily
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-evpnAf
+          spec:
+            endpoint: {{ $endpoint }}
+            asn: {{ $asn }}
+            addressFamily:
+              afName: evpn
+              neighbors:
+              - pgNameOrAddress: EVPN-OVERLAY-PEERS
+                active: true
+            crossplane:
+              compositionRef:
+                name: bgpaddressfamilys.eapi.eos.netclab.dev
+          ---
+          apiVersion: eos.netclab.dev/v1alpha1
+          kind: BgpAddressFamily
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xrName }}-ipv4Af
+          spec:
+            endpoint: {{ $endpoint }}
+            asn: {{ $asn }}
+            addressFamily:
+              afName: ipv4
+              neighbors:
+              - pgNameOrAddress: EVPN-OVERLAY-PEERS
+                active: false
+              - pgNameOrAddress: IPv4-UNDERLAY-PEERS
+                active: true
+            crossplane:
+              compositionRef:
+                name: bgpaddressfamilys.eapi.eos.netclab.dev
+
+  - step: auto-ready
+    functionRef:
+      name: crossplane-contrib-function-auto-ready
