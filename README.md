@@ -1,17 +1,21 @@
 # configuration-eos
 
+## BnP
+
 ```
 up login
 ```
 
 ```
-export VERSION=v0.0.1
-crossplane xpkg build --package-file configuration-eos-${VERSION}.xpkg
-up xpkg push -f configuration-eos-v0.0.1.xpkg xpkg.upbound.io/netclab/configuration-eos:${VERSION}
+export VERSION=v0.0.2
+crossplane xpkg build --package-root=./ --package-file=./configuration-eos-${VERSION}.xpkg --examples-root=./examples --ignore=doc/*
+up xpkg push -f configuration-eos-${VERSION}.xpkg xpkg.upbound.io/netclab/configuration-eos:${VERSION}
 rm configuration-eos-${VERSION}.xpkg
 ```
 
 ---
+
+## Install
 
 ```
 helm repo add crossplane-stable https://charts.crossplane.io/stable
@@ -30,7 +34,7 @@ kind: Configuration
 metadata:
   name: netclab-configuration-eos
 spec:
-  package: xpkg.upbound.io/netclab/configuration-eos:v0.0.1
+  package: xpkg.upbound.io/netclab/configuration-eos:${VERSION}
 EOF
 ```
 
