@@ -18,10 +18,11 @@ metadata:
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
-    # spanning-tree mode mstp: {} # default; isRemovedCheck fails
-    # default spanning-tree mode
-    # TODO: function-eapi: if head startswith("default") then simpler isRemovedCheck (only no error)
-    #       then new Composition for spanning-tree mode or very specific XR kind: AvdSingleDcL3LeafStp with all global stp cmds
+    # spanning-tree mode mstp: {} # default; expectedResponseCheck/isRemovedCheck fails
+    # TODO: function-eapi: if head startswith("default") then ...
+    # special case (the default is displayed in config):
+    #     default spanning-tree mode mstp: {}
+    # expectedResponseCheck (?), isRemovedCheck (?)
     no spanning-tree vlan-id 4093-4094: {}
     spanning-tree mst 0 priority 4096: {}
 ---
