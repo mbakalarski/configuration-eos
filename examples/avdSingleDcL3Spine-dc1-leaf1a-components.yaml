@@ -10,14 +10,14 @@ spec:
   range:
     start: 1006
     end: 1199
----
-apiVersion: eos.netclab.dev/v1alpha1
-kind: StpMode
-metadata:
-  name: dc1-leaf1a-2-0
-spec:
-  endpoint: dc1-leaf1a.default.svc.cluster.local
-  stpMode: mstp
+# ---
+# apiVersion: eos.netclab.dev/v1alpha1
+# kind: StpMode
+# metadata:
+#   name: dc1-leaf1a-2-0
+# spec:
+#   endpoint: dc1-leaf1a.default.svc.cluster.local
+#   stpMode: mstp   # TODO: mstp is default; state: False; XRD with enum w.o. mstp
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -168,6 +168,7 @@ metadata:
   name: dc1-leaf1a-5-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Port-Channel3:
       description MLAG_dc1-leaf1b_Port-Channel3: {}
@@ -182,6 +183,7 @@ metadata:
   name: dc1-leaf1a-5-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Port-Channel5:
       description SERVER_dc1-leaf1-server1_Bond1: {}
@@ -199,6 +201,7 @@ metadata:
   name: dc1-leaf1a-5-3
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Port-Channel8:
       description L2_dc1-leaf1c_Port-Channel1: {}
@@ -282,6 +285,7 @@ metadata:
   name: dc1-leaf1a-10-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Loopback0:
       description ROUTER_ID: {}
@@ -294,6 +298,7 @@ metadata:
   name: dc1-leaf1a-10-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Loopback1:
       description VXLAN_TUNNEL_SOURCE: {}
@@ -306,6 +311,7 @@ metadata:
   name: dc1-leaf1a-11-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Loopback10:
       description DIAG_VRF_VRF10: {}
@@ -319,6 +325,7 @@ metadata:
   name: dc1-leaf1a-11-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Loopback11:
       description DIAG_VRF_VRF11: {}
@@ -332,6 +339,7 @@ metadata:
   name: dc1-leaf1a-12-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vlan11:
       description VRF10_VLAN11: {}
@@ -345,6 +353,7 @@ metadata:
   name: dc1-leaf1a-12-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vlan12:
       description VRF10_VLAN12: {}
@@ -358,6 +367,7 @@ metadata:
   name: dc1-leaf1a-12-3
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vlan21:
       description VRF11_VLAN21: {}
@@ -371,6 +381,7 @@ metadata:
   name: dc1-leaf1a-12-4
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vlan22:
       description VRF11_VLAN22: {}
@@ -384,6 +395,7 @@ metadata:
   name: dc1-leaf1a-13-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vlan3009:
       description MLAG_L3_VRF_VRF10: {}
@@ -398,6 +410,7 @@ metadata:
   name: dc1-leaf1a-13-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vlan3010:
       description MLAG_L3_VRF_VRF11: {}
@@ -412,6 +425,7 @@ metadata:
   name: dc1-leaf1a-14
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vlan4093:
       description MLAG_L3: {}
@@ -425,6 +439,7 @@ metadata:
   name: dc1-leaf1a-15
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vlan4094:
       description MLAG: {}
@@ -532,6 +547,7 @@ metadata:
   name: dc1-leaf1a-21-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     ip prefix-list PL-LOOPBACKS-EVPN-OVERLAY:
       seq 10 permit 10.255.0.0/27 eq 32: {}
@@ -543,6 +559,7 @@ metadata:
   name: dc1-leaf1a-21-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     route-map RM-CONN-2-BGP permit 10:
       match ip address prefix-list PL-LOOPBACKS-EVPN-OVERLAY: {}
@@ -553,6 +570,7 @@ metadata:
   name: dc1-leaf1a-22-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     ip prefix-list PL-MLAG-PEER-VRFS:
       seq 10 permit 10.255.1.96/31: {}
@@ -563,6 +581,7 @@ metadata:
   name: dc1-leaf1a-22-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     route-map RM-CONN-2-BGP-VRFS deny 10:
       match ip address prefix-list PL-MLAG-PEER-VRFS: {}
@@ -574,6 +593,7 @@ metadata:
   name: dc1-leaf1a-23
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     route-map RM-MLAG-PEER-IN permit 10:
       description Make routes learned over MLAG Peer-link less preferred on spines to ensure optimal routing: {}
