@@ -10,18 +10,25 @@ spec:
   range:
     start: 1006
     end: 1199
-# ---
-# apiVersion: eos.netclab.dev/v1alpha1
-# kind: EosCommand
-# metadata:
-#   name: dc1-leaf1a-2
-# spec:
-#   endpoint: dc1-leaf1a.default.svc.cluster.local
-#   cmds:
-#     spanning-tree mode mstp: {}
-#     # TODO: function-eapi: leaf cmd startswith "no "
-#     # no spanning-tree vlan-id 4093-4094: {}
-#     spanning-tree mst 0 priority 4096: {}
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: StpMode
+metadata:
+  name: dc1-leaf1a-2-0
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  stpMode: mstp
+---
+apiVersion: eos.netclab.dev/v1alpha1
+kind: EosCommand
+metadata:
+  name: dc1-leaf1a-2
+spec:
+  endpoint: dc1-leaf1a.default.svc.cluster.local
+  cmds:
+    # spanning-tree mode mstp: {} # default; isRemovedCheck fails
+    no spanning-tree vlan-id 4093-4094: {}
+    spanning-tree mst 0 priority 4096: {}
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -29,6 +36,7 @@ metadata:
   name: dc1-leaf1a-3-1
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 11:
       name VRF10_VLAN11: {}
@@ -39,6 +47,7 @@ metadata:
   name: dc1-leaf1a-3-2
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 12:
       name VRF10_VLAN12: {}
@@ -49,6 +58,7 @@ metadata:
   name: dc1-leaf1a-3-3
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 21:
       name VRF11_VLAN21: {}
@@ -59,6 +69,7 @@ metadata:
   name: dc1-leaf1a-3-4
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 22:
       name VRF11_VLAN22: {}
@@ -69,6 +80,7 @@ metadata:
   name: dc1-leaf1a-3-5
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 3009:
       name MLAG_L3_VRF_VRF10: {}
@@ -80,6 +92,7 @@ metadata:
   name: dc1-leaf1a-3-6
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 3010:
       name MLAG_L3_VRF_VRF11: {}
@@ -91,6 +104,7 @@ metadata:
   name: dc1-leaf1a-3-7
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 3401:
       name L2_VLAN3401: {}
@@ -101,6 +115,7 @@ metadata:
   name: dc1-leaf1a-3-8
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 3402:
       name L2_VLAN3402: {}
@@ -111,6 +126,7 @@ metadata:
   name: dc1-leaf1a-3-9
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 4093:
       name MLAG_L3: {}
@@ -122,6 +138,7 @@ metadata:
   name: dc1-leaf1a-3-10
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     vlan 4094:
       name MLAG: {}
@@ -422,6 +439,7 @@ metadata:
   name: dc1-leaf1a-16
 spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
+  removeContainer: true
   cmds:
     interface Vxlan1:
       description dc1-leaf1a_VTEP: {}
