@@ -10,14 +10,6 @@ spec:
   range:
     start: 1006
     end: 1199
-# ---
-# apiVersion: eos.netclab.dev/v1alpha1
-# kind: StpMode
-# metadata:
-#   name: dc1-leaf1a-2-0
-# spec:
-#   endpoint: dc1-leaf1a.default.svc.cluster.local
-#   stpMode: mstp   # TODO: mstp is default; state: False; XRD with enum w.o. mstp
 ---
 apiVersion: eos.netclab.dev/v1alpha1
 kind: EosCommand
@@ -27,6 +19,9 @@ spec:
   endpoint: dc1-leaf1a.default.svc.cluster.local
   cmds:
     # spanning-tree mode mstp: {} # default; isRemovedCheck fails
+    # default spanning-tree mode
+    # TODO: function-eapi: if head startswith("default") then simpler isRemovedCheck (only no error)
+    #       then new Composition for spanning-tree mode or very specific XR kind: AvdSingleDcL3LeafStp with all global stp cmds
     no spanning-tree vlan-id 4093-4094: {}
     spanning-tree mst 0 priority 4096: {}
 ---
